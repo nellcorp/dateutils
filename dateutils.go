@@ -1,6 +1,7 @@
 package dateutils
 
 import (
+	"database/sql/driver"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -60,4 +61,17 @@ func ParseTime(t string) (result time.Time, err error) {
 	}
 	err = fmt.Errorf("Could not parse time: %v", err)
 	return
+}
+
+func (j JsonDate) Value() (driver.Value, error) {
+	return j.Time(), nil
+}
+
+func (a *JsonDate) Scan(src interface{}) error {
+	switch v := src.(type) {
+	case time.Time:
+		*a = JsonDate(v)
+		return nil
+	}
+	return fmt.Errorf("cannot convert %T to JSON Date", src)
 }
